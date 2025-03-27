@@ -8,7 +8,11 @@ source 'http://rubygems.org'
 gemspec
 
 group :development do
-  gem 'rails', '~> 5.2'
+  if RUBY_VERSION.to_f < 3.0
+    gem 'rails', '~> 5.2'
+  else
+    gem 'rails', '~> 6.1'
+  end
   gem 'rspec-rails', '~> 5.0'
   gem 'rubocop', '~> 1.22'
   gem 'rubocop-rails', '~> 2.12'
