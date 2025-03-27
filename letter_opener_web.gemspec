@@ -23,6 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'letter_opener', '~> 1.9'
   gem.add_dependency 'railties', '>= 5.2'
   gem.add_dependency 'rexml'
+  gem.add_dependency 'logger'
 
   gem.metadata['rubygems_mfa_required'] = 'true'
 end
