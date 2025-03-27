@@ -7,6 +7,15 @@ RSpec.describe LetterOpenerWeb::LettersController do
 
   after(:each) { LetterOpenerWeb.reset! }
 
+  # TODO: Deprecated rails 5.2 and ruby 2.6
+  let(:expected_html_content_type) do
+    if Rails.version.to_f < 6
+      'text/html'
+    else
+      'text/html; charset=utf-8'
+    end
+  end
+
   describe 'GET index' do
     before do
       allow(LetterOpenerWeb::Letter).to receive(:search)
@@ -19,7 +28,7 @@ RSpec.describe LetterOpenerWeb::LettersController do
 
     it 'returns an HTML 200 response' do
       expect(response.status).to eq(200)
-      expect(response.content_type).to eq('text/html; charset=utf-8')
+      expect(response.content_type).to eq(expected_html_content_type)
     end
   end
 
@@ -38,7 +47,7 @@ RSpec.describe LetterOpenerWeb::LettersController do
 
       it 'renders an HTML 200 response' do
         expect(response.status).to eq(200)
-        expect(response.content_type).to eq('text/html; charset=utf-8')
+        expect(response.content_type).to eq(expected_html_content_type)
       end
     end
 
