@@ -6,7 +6,7 @@ require 'rexml/document'
 
 module LetterOpenerWeb
   class Config
-    attr_accessor :letters_location
+    attr_accessor :letters_location, :s3_bucket
   end
 
   def self.config

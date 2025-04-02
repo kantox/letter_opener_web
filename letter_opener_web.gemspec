@@ -24,5 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'railties', '>= 5.2'
   gem.add_dependency 'rexml'
 
+  gem.add_development_dependency 'aws-sdk-s3'
+
   gem.metadata['rubygems_mfa_required'] = 'true'
 end

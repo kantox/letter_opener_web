@@ -13,7 +13,7 @@ module LetterOpenerWeb
       @letters_location = nil
     end
 
-    def self.search
+    def self.search(_params = {})
       letters = Dir.glob("#{LetterOpenerWeb.config.letters_location}/*").map do |folder|
         new(id: File.basename(folder), sent_at: File.mtime(folder))
       end

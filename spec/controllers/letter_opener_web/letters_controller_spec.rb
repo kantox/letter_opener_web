@@ -17,18 +17,65 @@ RSpec.describe LetterOpenerWeb::LettersController do
   end
 
   describe 'GET index' do
-    before do
-      allow(LetterOpenerWeb::Letter).to receive(:search)
-      get :index
+    let(:params) { {} }
+
+    context 'when not configured with an s3 bucket' do
+      before do
+        allow(LetterOpenerWeb::Letter).to receive(:search)
+        allow(LetterOpenerWeb::S3Letter).to receive(:search)
+        get :index, params: params
+      end
+
+      it 'searches for all file system letters' do
+        expect(LetterOpenerWeb::Letter).to have_received(:search).with(params)
+      end
+
+      it 'does not search for s3 letters' do
+        expect(LetterOpenerWeb::S3Letter).not_to have_received(:search)
+      end
+
+      context 'with pagination params' do
+        let(:params) { { offset: '10', limit: '20' } }
+
+        it do
+          expect(LetterOpenerWeb::Letter).to have_received(:search).with(ActionController::Parameters.new(params).permit!)
+        end
+      end
+
+      it 'returns an HTML 200 response' do
+        expect(response.status).to eq(200)
+        expect(response.content_type).to eq(expected_html_content_type)
+      end
     end
 
-    it 'searches for all letters' do
-      expect(LetterOpenerWeb::Letter).to have_received(:search)
-    end
+    context 'when configured with an s3 bucket' do
+      before do
+        allow(LetterOpenerWeb::Letter).to receive(:search)
+        allow(LetterOpenerWeb::S3Letter).to receive(:search)
+        allow(LetterOpenerWeb.config).to receive(:s3_bucket).and_return('my-s3-bucket')
+        get :index, params: params
+      end
 
-    it 'returns an HTML 200 response' do
-      expect(response.status).to eq(200)
-      expect(response.content_type).to eq(expected_html_content_type)
+      context 'with pagination params' do
+        let(:params) { { offset: '10', limit: '20' } }
+
+        it do
+          expect(LetterOpenerWeb::S3Letter).to have_received(:search).with(ActionController::Parameters.new(params).permit!)
+        end
+      end
+
+      it 'searches for all file system letters' do
+        expect(LetterOpenerWeb::S3Letter).to have_received(:search).with(params)
+      end
+
+      it 'does not search for s3 letters' do
+        expect(LetterOpenerWeb::Letter).not_to have_received(:search)
+      end
+
+      it 'returns an HTML 200 response' do
+        expect(response.status).to eq(200)
+        expect(response.content_type).to eq(expected_html_content_type)
+      end
     end
   end
 
