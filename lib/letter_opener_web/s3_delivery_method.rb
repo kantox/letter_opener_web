@@ -7,7 +7,6 @@ module LetterOpenerWeb
   class S3DeliveryMethod < DeliveryMethod
     cattr_accessor :s3_client
     delegate :s3_client, to: 'self.class'
-    delegate :bucket, to: 'LetterOpenerWeb.config.s3_bucket'
 
     def initialize(*)
       raise('`aws-sdk-s3` gem is required for this delivery method') unless defined?(Aws::S3::Client)
@@ -21,12 +20,16 @@ module LetterOpenerWeb
         location = mail['location_plain'] || mail['location_rich']
         raise ArgumentError unless location
 
-        deliver_to_s3!(File.dirname(location.to_s))
+        folder = File.dirname(location.to_s)
+        deliver_to_s3!(folder)
+        mail['location_s3'] = "s3://#{File.join(LetterOpenerWeb.config.s3_bucket, File.basename(folder))}"
       end
     end
 
     def deliver_to_s3!(folder)
-      Pathname.new(folder).glob('*').each do |path|
+      Pathname.new(folder).glob(['*', '**/*']).map do |path|
+        next if path.directory?
+
         key = path.to_s.sub(LetterOpenerWeb.config.letters_location.to_s << '/', '')
         s3_client.put_object(
           bucket: bucket,
@@ -34,7 +37,11 @@ module LetterOpenerWeb
           body: path.open('rb'),
           acl: 'bucket-owner-full-control'
         )
-      end
+      end.compact
+    end
+
+    def bucket
+      LetterOpenerWeb.config.s3_bucket
     end
   end
 end
