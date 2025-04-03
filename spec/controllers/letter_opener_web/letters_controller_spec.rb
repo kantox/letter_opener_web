@@ -35,10 +35,11 @@ RSpec.describe LetterOpenerWeb::LettersController do
       end
 
       context 'with pagination params' do
-        let(:params) { { offset: '10', limit: '20' } }
+        let(:params) { { next_continuation_token: 'foo', limit: '20' } }
 
         it do
-          expect(LetterOpenerWeb::Letter).to have_received(:search).with(ActionController::Parameters.new(params).permit!)
+          expect(LetterOpenerWeb::Letter).to have_received(:search)
+                                         .with(ActionController::Parameters.new(params).permit!)
         end
       end
 
@@ -48,19 +49,20 @@ RSpec.describe LetterOpenerWeb::LettersController do
       end
     end
 
-    context 'when configured with an s3 bucket' do
+    context 'when configured for S3Letter model' do
       before do
         allow(LetterOpenerWeb::Letter).to receive(:search)
         allow(LetterOpenerWeb::S3Letter).to receive(:search)
-        allow(LetterOpenerWeb.config).to receive(:s3_bucket).and_return('my-s3-bucket')
+        allow(LetterOpenerWeb.config).to receive(:letter_model).and_return(LetterOpenerWeb::S3Letter.name)
         get :index, params: params
       end
 
       context 'with pagination params' do
-        let(:params) { { offset: '10', limit: '20' } }
+        let(:params) { { next_continuation_token: '10', limit: '20' } }
 
         it do
-          expect(LetterOpenerWeb::S3Letter).to have_received(:search).with(ActionController::Parameters.new(params).permit!)
+          expect(LetterOpenerWeb::S3Letter).to have_received(:search)
+            .with(ActionController::Parameters.new(params).permit!)
         end
       end
 
@@ -83,9 +85,10 @@ RSpec.describe LetterOpenerWeb::LettersController do
     let(:id)         { 'an-id' }
     let(:rich_text)  { 'rich text href="plain.html"' }
     let(:plain_text) { 'plain text href="rich.html"' }
-    let(:letter)     { double(:letter, rich_text: rich_text, plain_text: plain_text, id: id) }
 
     shared_examples 'found letter examples' do |letter_style|
+      let(:letter) { double(:letter, rich_text: rich_text, plain_text: plain_text, id: id) }
+
       before(:each) do
         expect(LetterOpenerWeb::Letter).to receive(:find).with(id).and_return(letter)
         expect(letter).to receive(:valid?).and_return(true)
@@ -98,8 +101,26 @@ RSpec.describe LetterOpenerWeb::LettersController do
       end
     end
 
+    shared_examples 'found s3 letter examples' do |letter_style|
+      let(:s3_letter) { double(:s3_letter, rich_text: rich_text, plain_text: plain_text, id: id) }
+
+      before(:each) do
+        allow(LetterOpenerWeb.config).to receive(:letter_model).and_return(LetterOpenerWeb::S3Letter.name)
+        expect(LetterOpenerWeb::Letter).to receive(:find).never
+        expect(LetterOpenerWeb::S3Letter).to receive(:find).with(id).and_return(s3_letter)
+        expect(s3_letter).to receive(:valid?).and_return(true)
+        get :show, params: { id: id, style: letter_style }
+      end
+
+      it 'renders an HTML 200 response' do
+        expect(response.status).to eq(200)
+        expect(response.content_type).to eq(expected_html_content_type)
+      end
+    end
+
     context 'rich text version' do
       include_examples 'found letter examples', 'rich'
+      include_examples 'found s3 letter examples', 'rich'
 
       it 'renders the rich text contents' do
         expect(response.body).to match(/^rich text/)
@@ -113,6 +134,7 @@ RSpec.describe LetterOpenerWeb::LettersController do
 
     context 'plain text version' do
       include_examples 'found letter examples', 'plain'
+      include_examples 'found s3 letter examples', 'plain'
 
       it 'renders the plain text contents' do
         expect(response.body).to match(/^plain text/)

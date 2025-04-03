@@ -19,7 +19,7 @@ module LetterOpenerWeb
           :letter_opener_web_s3,
           LetterOpenerWeb::S3DeliveryMethod,
           location: LetterOpenerWeb.config.letters_location,
-          s3_bucket: ENV['LETTER_OPENER_WEB_S3_BUCKET']
+          s3_bucket: ENV.fetch('LETTER_OPENER_WEB_S3_BUCKET', nil)
         )
       end
     end

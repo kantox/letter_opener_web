@@ -7,6 +7,8 @@ source 'http://rubygems.org'
 # development dependencies will be added by default to the :development group.
 gemspec
 
+gem 'aws-sdk-s3', '~> 1.183'
+
 group :development do
   case RUBY_VERSION.to_f
   when 2.7..3.3

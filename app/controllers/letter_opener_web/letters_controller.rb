@@ -46,7 +46,7 @@ module LetterOpenerWeb
     private
 
     def letter_model
-      LetterOpenerWeb.config.s3_bucket.present? ? S3Letter : Letter
+      LetterOpenerWeb.config.letter_model.constantize
     end
 
     def check_style
