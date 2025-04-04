@@ -5,14 +5,14 @@ require 'letter_opener/delivery_method'
 module LetterOpenerWeb
   # Delivery method to store files in and AWS S3 bucket
   class S3DeliveryMethod < DeliveryMethod
-    cattr_accessor :s3_client
+    cattr_writer :s3_client
     delegate :s3_client, to: 'self.class'
 
     def initialize(*)
       raise('`aws-sdk-s3` gem is required for this delivery method') unless defined?(Aws::S3::Client)
 
       super
-      self.class.s3_client ||= Aws::S3::Client.new(region: Aws.config[:region] || ENV.fetch('AWS_REGION', nil))
+      self.class.s3_client
     end
 
     def deliver!(mail)
@@ -42,6 +42,10 @@ module LetterOpenerWeb
 
     def bucket
       LetterOpenerWeb.config.s3_bucket
+    end
+
+    def s3_client
+      @s3_client ||= Aws::S3::Client.new(region: Aws.config[:region] || ENV.fetch('AWS_REGION', nil))
     end
   end
 end
