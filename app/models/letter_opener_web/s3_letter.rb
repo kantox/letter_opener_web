@@ -31,7 +31,8 @@ module LetterOpenerWeb
     def initialize_custom_fields
       @sent_at = Time.at(@id.split('_').first.to_i)
       @page_limit = @metadata&.max_keys
-      @page_next_continuation_token = @metadata&.next_marker
+      @page_next_continuation_token = @metadata.next_marker if @metadata.respond_to?(:next_marker)
+      @page_next_continuation_token ||= @metadata.next_continuation_token if @metadata.respond_to?(:next_continuation_token)
     end
 
     def list_related_files
