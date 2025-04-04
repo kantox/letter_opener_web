@@ -49,6 +49,7 @@ module LetterOpenerWeb
     # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def fetch_related_files
       return if style_exists?(:plain)
+      Rails.logger.info("#{self.class}##{__method__} Retrieving #{@id}")
 
       list_related_files.contents.map do |item|
         next if item.key.ends_with?('/')

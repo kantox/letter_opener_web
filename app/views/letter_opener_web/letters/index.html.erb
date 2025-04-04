@@ -1,12 +1,17 @@
 
 <div class="col left">
   <h1>
-    Letters
+    <%= link_to 'Letters', url_for(next_continuation_token: nil) %>
     <span class="btn-group btn-group-sm float-end" role="group" aria-label="actions">
-      <%= link_to 'Root', '/', class: 'btn btn-link root me-5' %>
+      <%= link_to 'Root', '/', class: 'btn btn-link root me-3' %>
+      <% if params[:next_continuation_token].present? %>
+        <%= link_to letters_path, class: 'btn btn-link' do %>
+          <small>First page</small>
+        <% end %>
+      <% end %>
       <% if @letters.first.respond_to?(:page_next_continuation_token) && @letters.first.page_next_continuation_token.present? %>
-        <%= link_to letters_path(page_next_continuation_token: @letters.first.page_next_continuation_token), class: 'btn btn-link' do %>
-          Next page
+        <%= link_to letters_path(next_continuation_token: @letters.first.page_next_continuation_token), class: 'btn btn-link' do %>
+          <small>Next page</small>
         <% end %>
       <% end %>
 

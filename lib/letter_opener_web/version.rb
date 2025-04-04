@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module LetterOpenerWeb
-  VERSION = '4.0.0-beta7'
+  VERSION = '4.0.0-beta8'
 end
