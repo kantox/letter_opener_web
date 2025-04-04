@@ -3,14 +3,17 @@
   <h1>
     Letters
     <span class="btn-group btn-group-sm float-end" role="group" aria-label="actions">
-      <%= link_to letters_path, class: 'btn btn-primary refresh' do %>
-        Refresh
-      <% end %>
+      <%= link_to 'Root', '/', class: 'btn btn-link root me-5' %>
       <% if @letters.first.respond_to?(:page_next_continuation_token) && @letters.first.page_next_continuation_token.present? %>
         <%= link_to letters_path(page_next_continuation_token: @letters.first.page_next_continuation_token), class: 'btn btn-link' do %>
           Next page
         <% end %>
       <% end %>
+
+      <%= link_to letters_path, class: 'btn btn-primary refresh' do %>
+        Refresh
+      <% end %>
+
       <%= link_to clear_letters_path, method: 'post', data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' do %>
         Clear
       <% end %>
