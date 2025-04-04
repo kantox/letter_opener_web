@@ -44,7 +44,7 @@ module LetterOpenerWeb
       LetterOpenerWeb.config.s3_bucket
     end
 
-    def s3_client
+    def self.s3_client
       @s3_client ||= Aws::S3::Client.new(region: Aws.config[:region] || ENV.fetch('AWS_REGION', nil))
     end
   end
