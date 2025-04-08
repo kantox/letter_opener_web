@@ -166,7 +166,7 @@ RSpec.describe LetterOpenerWeb::S3Letter do
     end
 
     it 'returns a list of ordered letters' do
-      expect(first_letter.sent_at).to be > last_letter.sent_at
+      expect(first_letter.sent_at).to be < last_letter.sent_at
     end
 
     context 'with next_continuation_token' do

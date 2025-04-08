@@ -92,9 +92,7 @@ module LetterOpenerWeb
         max_keys: params.fetch(:limit, DEFAULT_PAGE_LIMIT),
         continuation_token: params.fetch(:next_continuation_token, nil)
       )
-      result.common_prefixes
-            .map { |item| new(item, result) }
-            .reverse
+      result.common_prefixes.map { |item| new(item, result) }
     end
 
     def self.destroy_all
