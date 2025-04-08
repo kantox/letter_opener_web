@@ -80,6 +80,11 @@ module LetterOpenerWeb
       end
     end
 
+    # Notice that there is key difference. Give that S3 ListObjectsV2 does not
+    # allow to tune the sort order, we are unable to both paginate and sort the in a DESC way
+    # So:
+    #  * `Letter`: sort desc
+    #  * `S3Letter`: sort asc
     def self.search(params = {})
       result = s3_client.list_objects_v2(
         bucket: LetterOpenerWeb.config.s3_bucket,
@@ -89,7 +94,6 @@ module LetterOpenerWeb
       )
       result.common_prefixes
             .map { |item| new(item, result) }
-            .sort_by(&:sent_at)
             .reverse
     end
 
