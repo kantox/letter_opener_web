@@ -15,13 +15,7 @@ module LetterOpenerWeb
     delegate :s3_client, :delivery_method, to: 'self.class'
 
     def initialize(attributes, metadata = nil)
-      @id = case attributes
-            when ->(v) { v.respond_to?(:fetch) }  then attributes.fetch(:id)
-            when ->(v) { v.respond_to?(:prefix) } then File.basename(attributes.prefix)
-            else raise(ArgumentError, attributes.class)
-            end
-
-      super(id: @id)
+      super(id: extract_id(attributes))
       @metadata = metadata
       initialize_custom_fields
       base_dir_path.mkpath
@@ -29,11 +23,22 @@ module LetterOpenerWeb
       fetch_related_files
     end
 
+    def extract_id(attributes)
+      case attributes
+      when ->(v) { v.respond_to?(:fetch) }  then attributes.fetch(:id)
+      when ->(v) { v.respond_to?(:prefix) } then File.basename(attributes.prefix)
+      else raise(ArgumentError, attributes.class)
+      end
+    end
+
     def initialize_custom_fields
       @sent_at = Time.at(@id.split('_').first.to_i)
       @page_limit = @metadata&.max_keys
       @page_next_continuation_token = @metadata.next_marker if @metadata.respond_to?(:next_marker)
-      @page_next_continuation_token ||= @metadata.next_continuation_token if @metadata.respond_to?(:next_continuation_token)
+      return unless @metadata.respond_to?(:next_continuation_token)
+
+      @page_next_continuation_token ||= @metadata.next_continuation_token
+      :ok
     end
 
     def list_related_files
@@ -54,8 +59,8 @@ module LetterOpenerWeb
     # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def fetch_related_files
       return if style_exists?(:plain)
-      Rails.logger.info("#{self.class}##{__method__} Retrieving #{@id}")
 
+      Rails.logger.info("#{self.class}##{__method__} Retrieving #{@id}")
       list_related_files.contents.map do |item|
         next if item.key.ends_with?('/')
 
