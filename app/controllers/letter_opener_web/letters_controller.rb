@@ -64,7 +64,7 @@ module LetterOpenerWeb
     end
 
     def search_params
-      params.except(:locale).permit(:next_continuation_token, :limit)
+      params.except(:locale).permit(:next_continuation_token, :limit).to_h
     end
   end
 end

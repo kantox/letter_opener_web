@@ -39,7 +39,7 @@ RSpec.describe LetterOpenerWeb::LettersController do
 
         it do
           expect(LetterOpenerWeb::Letter).to have_received(:search)
-                                         .with(ActionController::Parameters.new(params).permit!)
+                                         .with(params)
         end
       end
 
@@ -62,7 +62,7 @@ RSpec.describe LetterOpenerWeb::LettersController do
 
         it do
           expect(LetterOpenerWeb::S3Letter).to have_received(:search)
-            .with(ActionController::Parameters.new(params).permit!)
+            .with(params)
         end
       end
 
