@@ -25,6 +25,7 @@ module LetterOpenerWeb
       @metadata = metadata
       initialize_custom_fields
       base_dir_path.mkpath
+      attachments_dir_path.mkpath
       fetch_related_files
     end
 
@@ -44,6 +45,10 @@ module LetterOpenerWeb
 
     def base_dir_path
       Rails.root.join(base_dir)
+    end
+
+    def attachments_dir_path
+      base_dir_path.join('attachments')
     end
 
     # rubocop:disable Metrics/AbcSize, Metrics/MethodLength

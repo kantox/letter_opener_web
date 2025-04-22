@@ -30,7 +30,8 @@ RSpec.describe LetterOpenerWeb::S3Letter do
             [
               s3_object_struct.new('1743105025_90816_58d0dfe/plain.html'),
               s3_object_struct.new('1743105025_90816_58d0dfe/rich.html'),
-              s3_object_struct.new('1743105025_90816_58d0dfe/attachment.pdf')
+              s3_object_struct.new('1743105025_90816_58d0dfe/attachment.pdf'),
+              s3_object_struct.new('1743105025_90816_58d0dfe/attachments/file.pdf')
             ],
             10,
             next_marker: nil
@@ -39,7 +40,7 @@ RSpec.describe LetterOpenerWeb::S3Letter do
       end
 
       let(:get_object_mock) do
-        allow(s3_client).to receive(:get_object).exactly(3).times
+        allow(s3_client).to receive(:get_object).exactly(4).times
       end
 
       let(:response_target_check) do
@@ -55,6 +56,8 @@ RSpec.describe LetterOpenerWeb::S3Letter do
       it { is_expected.to be_a(described_class) }
       it { expect(s3_letter.id).to eq('1743105025_90816_58d0dfe') }
       it { expect(s3_letter.sent_at).to eq(Time.at(1_743_105_025)) }
+      it { expect(s3_letter.base_dir_path).to be_exist }
+      it { expect(s3_letter.attachments_dir_path).to be_exist }
 
       it do
         expect(s3_client).to have_received(:list_objects_v2).with(
@@ -89,6 +92,16 @@ RSpec.describe LetterOpenerWeb::S3Letter do
           key: '1743105025_90816_58d0dfe/attachment.pdf',
           response_target: satisfy do |f|
             f.is_a?(File) && f.path == location.join('1743105025_90816_58d0dfe/attachment.pdf').to_s
+          end
+        ).once
+      end
+
+      it do
+        expect(s3_client).to have_received(:get_object).with(
+          bucket: 'my-bucket',
+          key: '1743105025_90816_58d0dfe/attachments/file.pdf',
+          response_target: satisfy do |f|
+            f.is_a?(File) && f.path == location.join('1743105025_90816_58d0dfe/attachments/file.pdf').to_s
           end
         ).once
       end
