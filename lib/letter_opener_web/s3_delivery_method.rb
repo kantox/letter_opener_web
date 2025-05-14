@@ -16,7 +16,11 @@ module LetterOpenerWeb
     end
 
     def deliver!(mail)
-      super.tap do |_outcome|
+      check_delivery_params(mail) if respond_to?(:check_delivery_params)
+
+      prefix = Time.now.strftime('%FT%T').gsub(/:/, '-')
+      folder = File.join(settings[:location], "#{prefix}_#{Digest::SHA1.hexdigest(mail.encoded)[0..6]}")
+      LetterOpener::Message.rendered_messages(mail, location: folder, message_template: settings[:message_template]).tap do |_outcome|
         location = mail['location_plain'] || mail['location_rich']
         raise ArgumentError unless location
 
