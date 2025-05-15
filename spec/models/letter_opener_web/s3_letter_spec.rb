@@ -192,6 +192,7 @@ RSpec.describe LetterOpenerWeb::S3Letter do
           bucket: 'my-bucket',
           delimiter: '/',
           max_keys: 20,
+          prefix: nil,
           continuation_token: 'foo'
         )
       end
@@ -207,8 +208,52 @@ RSpec.describe LetterOpenerWeb::S3Letter do
           bucket: 'my-bucket',
           delimiter: '/',
           max_keys: 2,
+          prefix: nil,
           continuation_token: nil
         )
+      end
+    end
+
+    context 'with date' do
+      let(:search_results) { described_class.search(limit: 2, date: today.strftime('%F')) }
+      let(:today) { Date.today }
+
+      before { search_results }
+
+      it do
+        expect(s3_client).to have_received(:list_objects_v2).with(
+          bucket: 'my-bucket',
+          delimiter: '/',
+          prefix: "#{today.strftime('%F')}T",
+          max_keys: 2,
+          continuation_token: nil
+        )
+      end
+    end
+
+    context 'with date and time' do
+      let(:search_results) { described_class.search(limit: 2, date: today.strftime('%F'), time: '23:59') }
+      let(:today) { Date.today }
+
+      before { search_results }
+
+      it do
+        expect(s3_client).to have_received(:list_objects_v2).with(
+          bucket: 'my-bucket',
+          delimiter: '/',
+          prefix: "#{today.strftime('%F')}T23-59",
+          max_keys: 2,
+          continuation_token: nil
+        )
+      end
+    end
+
+    context 'with time' do
+      let(:search_results) { described_class.search(limit: 2, time: '23:59') }
+      let(:today) { Date.today }
+
+      it do
+        expect { search_results }.to raise_error(ArgumentError)
       end
     end
   end

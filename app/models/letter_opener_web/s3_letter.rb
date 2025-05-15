@@ -99,10 +99,21 @@ module LetterOpenerWeb
       result = s3_client.list_objects_v2(
         bucket: LetterOpenerWeb.config.s3_bucket,
         delimiter: '/',
+        prefix: parse_prefix(params),
         max_keys: params.fetch(:limit, DEFAULT_PAGE_LIMIT),
         continuation_token: params.fetch(:next_continuation_token, nil)
       )
       result.common_prefixes.map { |item| new(item, result) }
+    end
+
+    def self.parse_prefix(params)
+      date = params[:date]
+      if date.blank? && params[:time].present?
+        raise(ArgumentError, "Date is required when time is provided: #{params}")
+      end
+      return nil unless date.present?
+
+      "#{params[:date]}T#{params[:time]&.sub(/:/, '-')}"
     end
 
     def self.destroy_all

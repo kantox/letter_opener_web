@@ -43,6 +43,15 @@ RSpec.describe LetterOpenerWeb::LettersController do
         end
       end
 
+      context 'with filtering params' do
+        let(:params) { { date: '2025-12-31', time: '13:59' } }
+
+        it do
+          expect(LetterOpenerWeb::Letter).to have_received(:search)
+                                         .with(params)
+        end
+      end
+
       it 'returns an HTML 200 response' do
         expect(response.status).to eq(200)
         expect(response.content_type).to eq(expected_html_content_type)
