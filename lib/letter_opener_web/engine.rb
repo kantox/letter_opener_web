@@ -2,6 +2,7 @@
 
 require 'letter_opener'
 require 'letter_opener_web/delivery_method'
+require 'letter_opener_web/s3_delivery_method'
 
 module LetterOpenerWeb
   class Engine < ::Rails::Engine
@@ -13,6 +14,12 @@ module LetterOpenerWeb
           :letter_opener_web,
           LetterOpenerWeb::DeliveryMethod,
           location: LetterOpenerWeb.config.letters_location
+        )
+        ActionMailer::Base.add_delivery_method(
+          :letter_opener_web_s3,
+          LetterOpenerWeb::S3DeliveryMethod,
+          location: LetterOpenerWeb.config.letters_location,
+          s3_bucket: ENV.fetch('LETTER_OPENER_WEB_S3_BUCKET', nil)
         )
       end
     end

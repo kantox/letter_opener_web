@@ -1,15 +1,36 @@
+
 <div class="col left">
   <h1>
-    Letters
-    <span class="float-end">
+    <%= link_to 'Letters', url_for(next_continuation_token: nil) %>
+    <span class="btn-group btn-group-sm float-end" role="group" aria-label="actions">
+      <%= link_to 'Root', '/', class: 'btn btn-link root me-3' %>
+      <% if params[:next_continuation_token].present? %>
+        <%= link_to letters_path, class: 'btn btn-link' do %>
+          <small>First page</small>
+        <% end %>
+      <% end %>
+      <% if @letters.first.respond_to?(:page_next_continuation_token) && @letters.first.page_next_continuation_token.present? %>
+        <%= link_to letters_path(next_continuation_token: @letters.first.page_next_continuation_token), class: 'btn btn-link' do %>
+          <small>Next page</small>
+        <% end %>
+      <% end %>
+
       <%= link_to letters_path, class: 'btn btn-primary refresh' do %>
         Refresh
       <% end %>
+
       <%= link_to clear_letters_path, method: 'post', data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' do %>
         Clear
       <% end %>
     </span>
   </h1>
+  <%= render 'search' %>
+  <% if flash[:alert].present? %>
+    <div class="alert alert-danger" role="alert"><%= flash[:alert] %></div>
+  <% end%>
+  <% if flash[:notice].present? %>
+    <div class="alert alert-info" role="alert"><%= flash[:notice] %></div>
+  <% end%>
     <div class="letter-opener" data-letters-path="<%= letters_path %>">
       <ul class="list-group w-100 rounded-0 pt-2">
         <% if first_letter = @letters.shift %>

@@ -5,7 +5,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, feature/SR-0000-reenable-ruby-2_6-3_0 ]
 
 jobs:
   test:

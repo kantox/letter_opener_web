@@ -10,7 +10,7 @@ module LetterOpenerWeb
     before_action :load_letter, only: %i[show attachment destroy]
 
     def index
-      @letters = LetterOpenerWeb::Letter.search
+      @letters = letter_model.search(search_params)
     end
 
     def show
@@ -31,8 +31,8 @@ module LetterOpenerWeb
     end
 
     def clear
-      LetterOpenerWeb::Letter.destroy_all
-      redirect_to routes.letters_path
+      count = letter_model.destroy_all
+      redirect_to routes.letters_path, notice: "#{count} objects destroyed"
     end
 
     def destroy
@@ -45,18 +45,26 @@ module LetterOpenerWeb
 
     private
 
+    def letter_model
+      LetterOpenerWeb.config.letter_model.constantize
+    end
+
     def check_style
       params[:style] = 'rich' unless %w[plain rich].include?(params[:style])
     end
 
     def load_letter
-      @letter = LetterOpenerWeb::Letter.find(params[:id])
+      @letter = letter_model.find(params[:id])
 
       head :not_found unless @letter.valid?
     end
 
     def routes
       LetterOpenerWeb.railtie_routes_url_helpers
+    end
+
+    def search_params
+      params.except(:locale).permit(:next_continuation_token, :limit, :date, :time).to_h
     end
   end
 end

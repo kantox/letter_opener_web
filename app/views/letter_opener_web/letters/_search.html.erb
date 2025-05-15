@@ -1,0 +1,15 @@
+<%= form_with method: :get do |form| %>
+  <div class="input-group input-group-sm mb-3">
+    <div class="row g-3">
+      <div class="col">
+        <%= form.date_field(:date, value: params[:date]) %>
+      </div>
+      <div class="col">
+        <%= form.time_field(:time, value: params[:time]) %>
+      </div>
+      <div class="col">
+        <%= form.submit('Filter') %>
+      </div>
+    </div>
+  </div>
+<% end %>
